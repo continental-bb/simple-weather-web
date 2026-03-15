@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Weather App</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f8ff; }
+    #weather { margin-top: 20px; }
+    select, button { padding: 5px; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Simple Weather App</h1>
+  
+  <label for="city">Choose a city:</label>
+  <select id="city">
+    <option value="London">London</option>
+    <option value="New York">New York</option>
+    <option value="Tokyo">Tokyo</option>
+    <option value="Paris">Paris</option>
+    <option value="AddCity">Add more...</option>
+  </select>
+  <button onclick="getWeather()">Get Weather</button>
+  
+  <div id="weather"></div>
+
+  <script>
+    // Replace YOUR_API_KEY_HERE with your actual API key
+    const apiKey ="4a1546192515ef26110f63749100a987";
+
+    async function getWeather() {
+      const city = document.getElementById('city').value;
+      if(city === "AddCity") {
+        const newCity = prompt("Enter city name:");
+        if(newCity) {
+          const select = document.getElementById('city');
+          const option = document.createElement('option');
+          option.value = newCity;
+          option.text = newCity;
+          select.add(option);
+          select.value = newCity;
+        } else return;
+      }
+
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("City not found");
+        const data = await response.json();
+
+        const weatherDiv = document.getElementById('weather');
+        weatherDiv.innerHTML = `
+          <h2>Weather in ${data.name}</h2>
+          <p><strong>Temperature:</strong> ${data.main.temp} °C</p>
+          <p><strong>Condition:</strong> ${data.weather[0].description}</p>
+          <p><strong>Humidity:</strong> ${data.main.humidity}%</p>
+          <p><strong>Wind Speed:</strong> ${data.wind.speed} m/s</p>
+        `;
+      } catch (err) {
+        document.getElementById('weather').innerHTML = `<p style="color:red;">${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
