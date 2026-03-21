@@ -1,10 +1,16 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
 
 function App() {
+  const[ form, setForm] = useState({
+    fullname: "",
+    username: "",
+    phoneno: "",
+    birthday: "",
+    location: "", 
+    email: "",
+    password: "",});
+ 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
       <h1>Welcome to My React Page!</h1>
