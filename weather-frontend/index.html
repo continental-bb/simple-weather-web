@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather App</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 50px;
+        background: #87ceeb;
+        color: #333;
+    }
+    .weather-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        max-width: 400px;
+        margin: 0 auto;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    }
+    .weather-card h2 { margin-bottom: 10px; font-size: 1.8em; }
+    .weather-card p { font-size: 1.2em; margin: 5px 0; }
+    button, select {
+        padding: 10px;
+        font-size: 1em;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: #1c544d solid 5px;
+    }
+    button { background: #1c544d; color: rgb(73, 57, 102); cursor: pointer; }
+    button:hover { background: #43eb22; }
+</style>
+</head>
+<body>
+
+<div class="weather-card">
+    <h2 id="location">Fetching location...</h2>
+    <p id="temperature">-- °C</p>
+    <p id="description">--</p>
+
+    <div>
+        <select id="city">
+            <option value="London">London</option>
+            <option value="New York">New York</option>
+            <option value="Tokyo">Tokyo</option>
+            <option value="Paris">Paris</option>
+            <option value="AddCity">Add more...</option>
+        </select>
+        <button onclick="getWeather()">Get Weather</button>
+    </div>
+</div>
+
+<script>
+async function fetchWeather(lat, lon) {
+    try {
+        const res = await fetch(`http://localhost:8080/weather?lat=${lat}&lon=${lon}`);
+        const data = await res.json();
+        document.getElementById('temperature').textContent = Math.round(data.main.temp) + " °C";
+        document.getElementById('description').textContent = data.weather[0].description;
+        document.getElementById('location').textContent = data.name;
+    } catch (err) {
+        document.getElementById('location').textContent = "Error fetching weather";
+        console.error(err);
+    }
+}
+
+// Get user geolocation
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+        pos => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+        err => console.error(err)
+    );
+} else {
+    document.getElementById('location').textContent = "Geolocation not supported";
+}
+
+// Fetch weather by city from backend
+function getWeather() {
+    const citySelect = document.getElementById('city');
+    let city = citySelect.value;
+    if(city === "AddCity") {
+        const newCity = prompt("Enter city name:");
+        if(newCity) {
+            const option = document.createElement('option');
+            option.value = newCity;
+            option.text = newCity;
+            citySelect.add(option);
+            citySelect.value = newCity;
+        } else return;
+    }
+    fetch(`http://localhost:8080/weather/city?city=${city}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('temperature').textContent = Math.round(data.main.temp) + " °C";
+            document.getElementById('description').textContent = data.weather[0].description;
+            document.getElementById('location').textContent = data.name;
+        })
+        .catch(err => console.error(err));
+}
+</script>
+
+</body>
+</html>
